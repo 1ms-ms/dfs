@@ -16,6 +16,7 @@ def db_connection():
 #List all the notes
 @app.route("/", methods=["GET"])
 def notes():
+    note = None
     con = db_connection()
     cursor = con.cursor()
     cursor = con.execute("SELECT * FROM note")
@@ -44,8 +45,7 @@ def notes_post():
 def notes_delete(id):
     con = db_connection()
     cursor = con.cursor()
-    note = None
-    
+       
     sql = """ DELETE FROM note WHERE id=? """
     con.execute(sql, (id,))
     con.commit()
