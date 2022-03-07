@@ -32,8 +32,8 @@ def notes_post():
     con = db_connection()
     cursor = con.cursor()
 
-    new_id = request.form["id"]
-    new_content = request.form["content"]
+    new_id = request.json["id"]
+    new_content = request.json["content"]
     sql = """INSERT OR IGNORE INTO note (id, content)
         VALUES (?, ?)"""
     cursor = cursor.execute(sql, (new_id, new_content))
