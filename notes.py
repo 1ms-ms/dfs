@@ -24,20 +24,21 @@ def notes():
         dict(id=row[0],content=row[1])
         for row in cursor.fetchall()
         ]
-    if notes is not None:
-        return jsonify(notes)   
+    if notes is not None:  
+        con.close()
+        return jsonify(notes) 
 #Post a note with given id and content
 @app.route("/create", methods=["POST"])
 def notes_post():
     con = db_connection()
     cursor = con.cursor()
 
-    new_id = request.json["id"]
     new_content = request.json["content"]
-    sql = """INSERT OR IGNORE INTO note (id, content)
-        VALUES (?, ?)"""
-    cursor = cursor.execute(sql, (new_id, new_content))
+    sql = """INSERT OR IGNORE INTO note (content)
+        VALUES (?)"""
+    cursor = cursor.execute(sql, (new_content,))
     con.commit()
+    con.close()
     return "Success", 200
 
 #Delete a note with given id
@@ -49,8 +50,8 @@ def notes_delete(id):
     sql = """ DELETE FROM note WHERE id=? """
     con.execute(sql, (id,))
     con.commit()
+    con.close()
     return "Deleted note with id: {} .".format(id), 200
-
 
 if __name__ == "__main__":
     app.run(debug=True)
