@@ -4,76 +4,52 @@ import sqlite3
 
 app = Flask(__name__)
 
-
+#connect to db
 def db_connection():
-    conn = None
+    con = None
     try:
-        conn = sqlite3.connect("notes.sqlite")
-    except sqlite3.error as e:
-        print(e)
-    return conn
+        con = sqlite3.connect("notes.sqlite")
+    except sqlite3.error as errorcode:
+        print(errorcode)
+    return con
 
-
-@app.route("/notes", methods=["GET", "POST"])
+#List all the notes
+@app.route("/", methods=["GET"])
 def notes():
-    conn = db_connection()
-    cursor = conn.cursor()
-
-    if request.method == "GET":
-        cursor = conn.execute("SELECT * FROM note")
-        notes = [
-            dict(id=row[0],content=row[1])
-            for row in cursor.fetchall()
+    con = db_connection()
+    cursor = con.cursor()
+    cursor = con.execute("SELECT * FROM note")
+    notes = [
+        dict(id=row[0],content=row[1])
+        for row in cursor.fetchall()
         ]
-        if notes is not None:
-            return jsonify(notes)
+    if notes is not None:
+        return jsonify(notes)   
+#Post a note with given id and content
+@app.route("/create", methods=["POST"])
+def notes_post():
+    con = db_connection()
+    cursor = con.cursor()
 
-    if request.method == "POST":
-        new_id = request.form["id"]
-        new_content = request.form["content"]
-        sql = """INSERT INTO note (id, content)
-                 VALUES (?, ?)"""
-        cursor = cursor.execute(sql, (new_id, new_content))
-        conn.commit()
-        return f" successfully", 201
+    new_id = request.form["id"]
+    new_content = request.form["content"]
+    sql = """INSERT OR IGNORE INTO note (id, content)
+        VALUES (?, ?)"""
+    cursor = cursor.execute(sql, (new_id, new_content))
+    con.commit()
+    return f"Success", 200
 
-
-@app.route("/note/<int:id>", methods=["GET", "PUT", "DELETE"])
-def single_note(id):
-    conn = db_connection()
-    cursor = conn.cursor()
+#Delete a note with given id
+@app.route("/delete/<int:id>", methods=["DELETE"])
+def notes_delete(id):
+    con = db_connection()
+    cursor = con.cursor()
     note = None
-    if request.method == "GET":
-        cursor.execute("SELECT * FROM note WHERE id=?", (id,))
-        rows = cursor.fetchall()
-        for r in rows:
-            note = r
-        if note is not None:
-            return jsonify(note), 200
-        else:
-            return "Something wrong", 404
-
-    if request.method == "PUT":
-        sql = """UPDATE note
-                SET id=?,
-                    content=?,
-                WHERE id=? """
-
-        id = request.form["id"]
-        content= request.form["content"]
-        updated_note = {
-            "id": id,
-            "content": content,
-        }
-        conn.execute(sql, (id, content))
-        conn.commit()
-        return jsonify(updated_note)
-
-    if request.method == "DELETE":
-        sql = """ DELETE FROM note WHERE id=? """
-        conn.execute(sql, (id,))
-        conn.commit()
-        return "The book with id: {} has been ddeleted.".format(id), 200
+    
+    sql = """ DELETE FROM note WHERE id=? """
+    con.execute(sql, (id,))
+    con.commit()
+    return "Deleted note with id: {} .".format(id), 200
 
 
 if __name__ == "__main__":
