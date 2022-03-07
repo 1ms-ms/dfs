@@ -37,7 +37,7 @@ def notes_post():
         VALUES (?, ?)"""
     cursor = cursor.execute(sql, (new_id, new_content))
     con.commit()
-    return f"Success", 200
+    return "Success", 200
 
 #Delete a note with given id
 @app.route("/delete/<int:id>", methods=["DELETE"])
