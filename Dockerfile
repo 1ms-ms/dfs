@@ -4,7 +4,6 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 COPY notes.py db.py ./
-COPY venv ./venv
 ENV FLASK_APP=notes.py
 EXPOSE 5000/tcp
 RUN python3 db.py
