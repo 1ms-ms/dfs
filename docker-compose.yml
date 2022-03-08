@@ -1,0 +1,9 @@
+version: "3"
+services:
+  notes:
+    build: .
+    container_name: notes_container
+    ports:
+      - "9000:5000"
+    volumes:
+      - ./notes.sqlite:/app/notes.sqlite
